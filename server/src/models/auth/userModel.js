@@ -36,6 +36,27 @@ const userSchema = new mongoose.Schema(
             enum: ["user", "admin", "creator"],
             default: "user",
         },
+        friends: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+            },
+        ],
+        friendRequests: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+            },
+        ],
+        lastSeen: {
+            type: Date,
+            default: Date.now,
+        },
+        theme: {
+            type: String,
+            enum: ["light", "dark"],
+            default: "light",
+        },
         isVerified: {
             type: Boolean,
             default: false,

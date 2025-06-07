@@ -1,6 +1,6 @@
 import expressAsyncHandler from "express-async-handler";
-import UserModel from "../../models/auth/userModel.js";
-import TokenModel from "../../models/auth/tokenModel.js";
+import UserModel from "../../models/auth/UserModel.js";
+import TokenModel from "../../models/auth/TokenModel.js";
 import { generateToken, verifyToken } from "../../helpers/generateToken.js";
 import { hashToken, verificationToken } from "../../helpers/hashToken.js";
 import sendEmail from "../../helpers/sendEmail.js";
