@@ -61,6 +61,10 @@ const registerUser = expressAsyncHandler(async (req, res) => {
         photo: user.photo,
         bio: user.bio,
         isVerified: user.isVerified,
+        theme: user.theme,
+        friends: user.friends,
+        friendRequests: user.friendRequests,
+        lastSeen: user.lastSeen,
         token: token,
     });
 });
@@ -105,6 +109,10 @@ const loginUser = expressAsyncHandler(async (req, res) => {
         photo: user.photo,
         bio: user.bio,
         isVerified: user.isVerified,
+        theme: user.theme,
+        friends: user.friends,
+        friendRequests: user.friendRequests,
+        lastSeen: user.lastSeen,
         token: token,
     });
 });
@@ -140,6 +148,10 @@ const getUser = expressAsyncHandler(async (req, res) => {
         photo: user.photo,
         bio: user.bio,
         isVerified: user.isVerified,
+        theme: user.theme,
+        friends: user.friends,
+        friendRequests: user.friendRequests,
+        lastSeen: user.lastSeen,
     });
 });
 
@@ -159,6 +171,11 @@ const updateUser = expressAsyncHandler(async (req, res) => {
     user.photo = req.body.photo || user.photo;
     user.bio = req.body.bio || user.bio;
     user.role = req.body.role || user.role;
+    user.theme = req.body.theme || user.theme;
+    user.friends = req.body.friends || user.friends;
+    user.friendRequests = req.body.friendRequests || user.friendRequests;
+    user.lastSeen = req.body.lastSeen || user.lastSeen;
+    user.isVerified = req.body.isVerified !== undefined ? req.body.isVerified : user.isVerified;
 
     const updatedUser = await user.save();
 
@@ -174,6 +191,10 @@ const updateUser = expressAsyncHandler(async (req, res) => {
         photo: updatedUser.photo,
         bio: updatedUser.bio,
         isVerified: updatedUser.isVerified,
+        theme: updatedUser.theme,
+        friends: updatedUser.friends,
+        friendRequests: updatedUser.friendRequests,
+        lastSeen: updatedUser.lastSeen,
     });
 });
 

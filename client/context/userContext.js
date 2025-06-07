@@ -373,21 +373,21 @@ export const UserContextProvider = ({ children }) => {
     return (
         <UserContext.Provider
             value={{
-                registerUser,
+                user,
+                allUsers,
                 userState,
-                handlerUserInput,
                 loginUser,
                 logoutUser,
-                userLoginStatus,
-                user,
                 updateUser,
-                emailVerification,
                 verifyUser,
-                forgotPasswordEmail,
+                deleteUser,
+                registerUser,
                 resetPassword,
                 changePassword,
-                allUsers,
-                deleteUser,
+                userLoginStatus,
+                handlerUserInput,
+                emailVerification,
+                forgotPasswordEmail,
             }}
         >
             {children}
