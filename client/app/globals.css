@@ -20,12 +20,18 @@ body {
     background: url("../public/glass-bg.png") no-repeat center center fixed;
 }
 
-form {
+.register-form,
+.login-form,
+.forgot-password-form,
+.change-password-form {
     position: relative;
     box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.08);
 }
 
-form > img {
+.register-form,
+.login-form,
+.forgot-password-form,
+.change-password-form > img {
     position: absolute;
     top: 0;
     left: 0;
@@ -37,11 +43,11 @@ form > img {
 }
 
 .active-nav {
-    color: #5c28bc
+    color: #5c28bc;
 }
 
 .gradient-text {
-    background: linear-gradient(90deg, #b728bc, #3c45c6);
+    background: linear-gradient(90deg, #2a16bf, #c63cb1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

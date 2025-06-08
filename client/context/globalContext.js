@@ -3,7 +3,7 @@ import React from "react";
 const GlobalContext = React.createContext();
 
 export const GlobalContextProvider = ({ children }) => {
-    const [currentView, setCurrentView] = React.useState("allChats");
+    const [currentView, setCurrentView] = React.useState("all-chats");
     const [showFriendProfile, setShowFriendProfile] = React.useState(false);
     const [showProfile, setShowProfile] = React.useState(false);
 

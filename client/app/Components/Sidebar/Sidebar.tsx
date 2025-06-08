@@ -2,9 +2,13 @@
 
 import { useGlobalContext } from "@/context/globalContext";
 import { useUserContext } from "@/context/userContext";
-import { archive, group, inbox, moon, sun } from "@/utils/icons";
+import { archive, chat, group, inbox, moon, sun } from "@/utils/icons";
 import Image from "next/image";
 import React, { useEffect } from "react";
+import SearchInput from "../SearchInput/SearchInput";
+import ChatItem from "../ChatItem/ChatItem";
+import { useChatContext } from "@/context/chatContext";
+import { IChat, IUser } from "@/types/type";
 
 const navButtons = [
     {
@@ -34,10 +38,9 @@ function Sidebar() {
     const { user, updateUser } = useUserContext();
     const { currentView, showProfile, handleViewChange, handleProfileToggle, handleFriendProfile } =
         useGlobalContext();
+    const { allChatsData, handleSelectedChat, selectedChat } = useChatContext();
 
     const { theme, photo, friendRequests } = user;
-
-    console.log("🚀 ~ SIdebar.tsx:40 ~ Sidebar ~ theme:", theme);
 
     const lightTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
         updateUser(e, { theme: "light" });
@@ -52,20 +55,19 @@ function Sidebar() {
     }, [theme]);
 
     return (
-        <div className="w-[32%] flex border-r-2 border-white dark:border-[#3C3C3C]/65">
-            <div
-                className="p-4 flex flex-col justify-between items-center border-r-2 
-                        border-white dark:border-[#3C3C3C]/65"
-            >
+        <div className="w-[24rem] flex border-r-2 border-white dark:border-[#3C3C3C]/65">
+            <div className="p-4 flex flex-col justify-between items-center border-r-2 border-white dark:border-[#3C3C3C]/65">
                 <div className="profile flex -flex-col items-center">
-                    <Image
-                        src={photo}
-                        alt="Profile Picture"
-                        width={50}
-                        height={50}
-                        className="aspect-square rounded-full object-cover border-2 border-white dark:border-[#3C3C3C]/65 
+                    {photo && (
+                        <Image
+                            src={photo}
+                            alt="Profile Picture"
+                            width={50}
+                            height={50}
+                            className="aspect-square rounded-full object-cover border-2 border-white dark:border-[#3C3C3C]/65 
                                 cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out shadow-sm select-text"
-                    />
+                        />
+                    )}
                 </div>
                 <div className="relative py-4 px-3 flex flex-col items-center gap-8 border-2 rounded-3xl border-white dark:border-[#3C3C3C]/65 shadow-sm">
                     {navButtons.map((btn, index: number) => {
@@ -113,7 +115,54 @@ function Sidebar() {
                     </button>
                 </div>
             </div>
-            <div className="p-4 pb-4 flex-1"></div>
+            <div className="py-4 flex-1">
+                <h2
+                    className={`px-4 font-bold text-2xl text-center ${
+                        theme === "dark" ? "text-white" : "gradient-text"
+                    }`}
+                >
+                    Messages
+                </h2>
+                <div className="px-4 mt-2">
+                    <SearchInput />
+                </div>
+
+                {currentView === "all-chats" && (
+                    <div className="mt-6">
+                        <h4
+                            className={`px-4 grid grid-cols-[22px_1fr] items-center font-bold ${
+                                theme === "dark" ? "text-white" : "gradient-text"
+                            }`}
+                        >
+                            {chat}
+                            <span>All Chats</span>
+                        </h4>
+
+                        <div className="mt-2">
+                            {allChatsData.map((chat: IChat) => {
+                                return (
+                                    <React.Fragment key={chat._id}>
+                                        {chat?.participantsData?.map((participant: IUser) => {
+                                            return (
+                                                <ChatItem
+                                                    key={participant._id}
+                                                    user={participant}
+                                                    active={!showProfile && selectedChat === chat._id}
+                                                    chatId={chat._id}
+                                                    onClick={() => {
+                                                        handleProfileToggle(false);
+                                                        handleSelectedChat(chat._id);
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
