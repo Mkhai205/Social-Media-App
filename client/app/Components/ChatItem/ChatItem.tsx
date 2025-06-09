@@ -11,30 +11,30 @@ import React from "react";
 interface ChatItemProps {
     user: IUser;
     active: boolean;
-    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onClick: () => void;
     chatId: string;
 }
 
 function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
-    const { getAllMessages } = useChatContext();
-    const { photo, username, lastSeen } = user;
+    const { getAllMessages, setMessages } = useChatContext();
+    const { photo } = user;
     const userId = useUserContext().user?._id;
 
     // local state
-    const [messages, setMessages] = React.useState<IMessage[]>([]);
+    const [messagesLocal, setMessagesLocal] = React.useState<IMessage[]>([]);
 
     // fetch messages for the chat
     const allMessages = React.useCallback(async () => {
         const fetchedMessages = await getAllMessages(chatId);
 
-        setMessages(fetchedMessages);
-    }, [getAllMessages, chatId, setMessages]);
+        setMessagesLocal(fetchedMessages);
+    }, [getAllMessages, chatId, setMessagesLocal]);
 
     React.useEffect(() => {
         allMessages();
     }, [allMessages, chatId]);
 
-    const lastMessage = messages[0];
+    const lastMessage = messagesLocal?.[messagesLocal.length - 1];
 
     const isUserOnline = true;
 
@@ -43,7 +43,10 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
             className={`px-4 py-3 flex gap-2 items-center border-b-2 border-white dark:border-[#3C3C3C]/65 cursor-pointer ${
                 active ? "bg-blue-100 dark:bg-white/5" : ""
             }`}
-            onClick={onClick}
+            onClick={() => {
+                onClick();
+                setMessages(messagesLocal);
+            }}
         >
             <div className="relative inline-block">
                 {photo && (

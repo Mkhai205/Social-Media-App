@@ -147,11 +147,14 @@ function Sidebar() {
                                                 <ChatItem
                                                     key={participant._id}
                                                     user={participant}
-                                                    active={!showProfile && selectedChat === chat._id}
+                                                    active={
+                                                        !showProfile &&
+                                                        selectedChat?._id === chat._id
+                                                    }
                                                     chatId={chat._id}
                                                     onClick={() => {
                                                         handleProfileToggle(false);
-                                                        handleSelectedChat(chat._id);
+                                                        handleSelectedChat(chat);
                                                     }}
                                                 />
                                             );

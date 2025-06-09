@@ -1,19 +1,21 @@
 "use client";
 import useRedirect from "@/hooks/useUserRedirect";
-import Sidebar from "./Components/Sidebar/Sidebar";
 import { useGlobalContext } from "@/context/globalContext";
-import Header from "./Components/Messages/Header/Header";
+import { useChatContext } from "@/context/chatContext";
+import Sidebar from "./Components/Sidebar/Sidebar";
 import Body from "./Components/Messages/Body/Body";
-import TextArea from "./Components/Messages/TextArea/TextArea";
 import Profile from "./Components/Profile/Profile";
+import Header from "./Components/Messages/Header/Header";
+import TextArea from "./Components/Messages/TextArea/TextArea";
 
 export default function Home() {
     useRedirect("/login");
 
     const { currentView, showFriendProfile, showProfile } = useGlobalContext();
+    const { selectedChat } = useChatContext();
 
     return (
-        <div className="relative px-40 py-10 h-full">
+        <div className="relative px-20 py-10 h-full">
             <main
                 className="h-full flex backdrop-blur-sm rounded-3xl border-white/65 dark:bg-[#262626]/90 border-2 
                         border-white dark:border-[#3C3C3C]/65 shadow-sm overflow-hidden"
@@ -21,10 +23,10 @@ export default function Home() {
                 <Sidebar />
                 <div className="flex-1 flex">
                     <div className="relative flex-1 border-r-2 border-white dark:border-[#3C3C3C]/65">
-                        {!showProfile && <Header />}
-                        {!showProfile && <Body />}
+                        {!showProfile && selectedChat && <Header />}
+                        {!showProfile && selectedChat && <Body />}
                         <div className="absolute flex flex-col w-full px-4 pb-4 left-0 bottom-0">
-                            {!showProfile && <TextArea />}
+                            {!showProfile && selectedChat && <TextArea />}
                         </div>
 
                         {showProfile && (

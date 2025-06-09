@@ -119,7 +119,7 @@ const getMessagesForChat = expressAsyncHandler(async (req, res) => {
         const messages = await MessagesModel.find({ chatId })
             .limit(limitNumber)
             .skip(offsetNumber)
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: 1 });
 
         res.status(200).json({
             message: "Messages retrieved successfully",

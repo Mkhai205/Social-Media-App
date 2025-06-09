@@ -12,6 +12,7 @@ export const ChatContextProvider = ({ children }) => {
     const [messages, setMessages] = React.useState([]);
     const [allChatsData, setAllChatsData] = React.useState([]);
     const [selectedChat, setSelectedChat] = React.useState(null);
+    const [activeChatData, setActiveChatData] = React.useState({});
 
     const { user } = useUserContext();
 
@@ -109,8 +110,10 @@ export const ChatContextProvider = ({ children }) => {
         }
     };
 
-    const handleSelectedChat = async (chatId) => {
-        setSelectedChat(chatId);
+    const handleSelectedChat = async (chat) => {
+        setSelectedChat(chat);
+
+        setActiveChatData(chat.participantsData[0] || {});
     };
 
     React.useEffect(() => {
@@ -132,6 +135,8 @@ export const ChatContextProvider = ({ children }) => {
                 messages,
                 selectedChat,
                 allChatsData,
+                activeChatData,
+                setMessages,
                 getUserById,
                 getUserChats,
                 getAllMessages,
