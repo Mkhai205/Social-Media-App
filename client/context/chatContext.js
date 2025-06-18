@@ -18,7 +18,6 @@ export const ChatContextProvider = ({ children }) => {
 
     const userId = user?._id;
 
-
     const getUserById = async (userId) => {
         try {
             if (!userId) {
@@ -51,7 +50,7 @@ export const ChatContextProvider = ({ children }) => {
     };
 
     // fetch messages for a specific chat
-    const getChatMessages = async (chatId, limit = 15, offset = 0) => {
+    const getChatMessages = async (chatId, limit = 15, offset = 0, sort = "asc") => {
         try {
             if (!chatId) {
                 console.error("Chat ID is required to fetch messages.");
@@ -59,23 +58,25 @@ export const ChatContextProvider = ({ children }) => {
             }
 
             const response = await axios.get(`${serverUrl}api/v1/messages/${chatId}`, {
-                params: { limit, offset },
+                params: { limit, offset, sort },
             });
 
-            setMessages(response.data);
+            setMessages(response?.data?.messages || []);
         } catch (error) {
             console.error("Error fetching chat messages:", error);
         }
     };
 
-    const getAllMessages = async (chatId) => {
+    const getAllMessages = async (chatId, limit = 15, offset = 0, sort = "asc") => {
         try {
             if (!chatId) {
                 console.error("Chat ID is required to fetch all messages.");
                 return [];
             }
 
-            const response = await axios.get(`${serverUrl}api/v1/messages/${chatId}`);
+            const response = await axios.get(`${serverUrl}api/v1/messages/${chatId}`, {
+                params: { limit, offset, sort },
+            });
 
             return response?.data?.messages;
         } catch (error) {
@@ -116,6 +117,39 @@ export const ChatContextProvider = ({ children }) => {
         setActiveChatData(chat.participantsData[0] || {});
     };
 
+    const sendMessage = async (data) => {
+        try {
+            const response = await axios.post(`${serverUrl}api/v1/messages`, data);
+
+            // Update the messages state with the new message
+            setMessages((prevMessages) => [...prevMessages, response?.data?.message]);
+
+            // update the chats state
+            setChats((prevChats) => {
+                const updatedChats = prevChats.map((chat) => {
+                    if (chat._id === data.chatId) {
+                        return {
+                            ...chat,
+                            lastMessage: response?.data?.message,
+                            updatedAt: new Date().toISOString(),
+                        };
+                    }
+
+                    return chat;
+                });
+
+                //move the chat to the top of the list
+                updatedChats.sort((a, b) => {
+                    return new Date(b.updatedAt) - new Date(a.updatedAt);
+                });
+
+                return updatedChats;
+            });
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    };
+
     React.useEffect(() => {
         if (userId) {
             getUserChats(userId);
@@ -128,6 +162,14 @@ export const ChatContextProvider = ({ children }) => {
         }
     }, [chats, user]);
 
+    React.useEffect(() => {
+        if (selectedChat) {
+            getChatMessages(selectedChat._id);
+        }
+    }, [selectedChat]);
+
+    console.log("ChatContextProvider rendered with chats:", chats);
+
     return (
         <ChatContext.Provider
             value={{
@@ -136,6 +178,7 @@ export const ChatContextProvider = ({ children }) => {
                 selectedChat,
                 allChatsData,
                 activeChatData,
+                sendMessage,
                 setMessages,
                 getUserById,
                 getUserChats,

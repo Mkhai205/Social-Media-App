@@ -110,16 +110,17 @@ const createMessage = expressAsyncHandler(async (req, res) => {
  */
 const getMessagesForChat = expressAsyncHandler(async (req, res) => {
     try {
-        const { limit, offset } = req.query;
+        const { limit, offset, sort } = req.query;
         const chatId = req.params.chatId;
 
         const limitNumber = parseInt(limit, 10) || 10; // Default limit to 10 if not provided
         const offsetNumber = parseInt(offset, 10) || 0; // Default offset to 0 if not provided
+        const sortOrder = sort || "asc"; // Default sort order to ascending if not provided
 
         const messages = await MessagesModel.find({ chatId })
             .limit(limitNumber)
             .skip(offsetNumber)
-            .sort({ createdAt: 1 });
+            .sort({ createdAt: sortOrder === "asc" ? 1 : -1 });
 
         res.status(200).json({
             message: "Messages retrieved successfully",

@@ -16,25 +16,23 @@ interface ChatItemProps {
 }
 
 function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
-    const { getAllMessages, setMessages } = useChatContext();
+    const { getAllMessages } = useChatContext();
     const { photo } = user;
     const userId = useUserContext().user?._id;
 
     // local state
-    const [messagesLocal, setMessagesLocal] = React.useState<IMessage[]>([]);
+    const [lastMessage, setLastMessage] = React.useState<IMessage | null>(null);
 
     // fetch messages for the chat
     const allMessages = React.useCallback(async () => {
-        const fetchedMessages = await getAllMessages(chatId);
+        const fetchedMessages = await getAllMessages(chatId, 1, 0, "desc");
 
-        setMessagesLocal(fetchedMessages);
-    }, [getAllMessages, chatId, setMessagesLocal]);
+        setLastMessage(fetchedMessages[0] || null);
+    }, [getAllMessages, chatId, setLastMessage]);
 
     React.useEffect(() => {
         allMessages();
     }, [allMessages, chatId]);
-
-    const lastMessage = messagesLocal?.[messagesLocal.length - 1];
 
     const isUserOnline = true;
 
@@ -43,10 +41,7 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
             className={`px-4 py-3 flex gap-2 items-center border-b-2 border-white dark:border-[#3C3C3C]/65 cursor-pointer ${
                 active ? "bg-blue-100 dark:bg-white/5" : ""
             }`}
-            onClick={() => {
-                onClick();
-                setMessages(messagesLocal);
-            }}
+            onClick={onClick}
         >
             <div className="relative inline-block">
                 {photo && (
@@ -70,17 +65,17 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
                 <div className="flex justify-between items-center">
                     <h4 className="font-medium">{user.username}</h4>
                     <p className="text-[#aaa] text-sm">
-                        {formatDateBasedOnTime(lastMessage?.createdAt)}
+                        {lastMessage?.createdAt ? formatDateBasedOnTime(lastMessage.createdAt) : ""}
                     </p>
                 </div>
                 <div className="flex justify-between items-center">
                     <p className=" text-sm text-[#aaa]">
                         {lastMessage?.senderId === userId
                             ? "You: " +
-                              (lastMessage?.content.length > 20
+                              (lastMessage && lastMessage?.content?.length > 20
                                   ? lastMessage?.content.substring(0, 20) + "..."
                                   : lastMessage?.content)
-                            : lastMessage?.content.length > 25
+                            : lastMessage && lastMessage?.content?.length > 25
                             ? lastMessage?.content.substring(0, 25) + "..."
                             : lastMessage?.content || "No Messages"}
                     </p>

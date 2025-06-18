@@ -59,8 +59,8 @@ function TextArea() {
             onSubmit={(e) => {
                 e.preventDefault();
                 sendMessage({
-                    sender: user?._id,
-                    receiver: activeChatData?._id,
+                    senderId: user?._id,
+                    receiverId: activeChatData?._id,
                     content: message,
                     chatId: selectedChat?._id,
                 });
