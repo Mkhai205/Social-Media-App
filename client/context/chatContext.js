@@ -1,18 +1,17 @@
-import React from "react";
-import axios from "axios";
+import axios from "../axios/config";
+import { useEffect, useState, createContext, useContext } from "react";
+
 import { useUserContext } from "./userContext";
 
-const ChatContext = React.createContext();
-
-const serverUrl = "http://localhost:8282/";
+const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
     // state
-    const [chats, setChats] = React.useState([]);
-    const [messages, setMessages] = React.useState([]);
-    const [allChatsData, setAllChatsData] = React.useState([]);
-    const [selectedChat, setSelectedChat] = React.useState(null);
-    const [activeChatData, setActiveChatData] = React.useState({});
+    const [chats, setChats] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [allChatsData, setAllChatsData] = useState([]);
+    const [selectedChat, setSelectedChat] = useState(null);
+    const [activeChatData, setActiveChatData] = useState({});
 
     const { user } = useUserContext();
 
@@ -25,7 +24,7 @@ export const ChatContextProvider = ({ children }) => {
                 return null;
             }
 
-            const response = await axios.get(`${serverUrl}api/v1/users/${userId}`);
+            const response = await axios.get(`/users/${userId}`);
 
             return response.data;
         } catch (error) {
@@ -41,7 +40,7 @@ export const ChatContextProvider = ({ children }) => {
                 return [];
             }
 
-            const response = await axios.get(`${serverUrl}api/v1/chats/${userId}`);
+            const response = await axios.get(`/chats/${userId}`);
 
             setChats(response.data.chats);
         } catch (error) {
@@ -50,15 +49,24 @@ export const ChatContextProvider = ({ children }) => {
     };
 
     // fetch messages for a specific chat
-    const getChatMessages = async (chatId, limit = 15, offset = 0, sort = "asc") => {
+    const getChatMessages = async (
+        chatId,
+        limit = 15,
+        offset = 0,
+        sort = "asc"
+    ) => {
         try {
             if (!chatId) {
                 console.error("Chat ID is required to fetch messages.");
                 return [];
             }
 
-            const response = await axios.get(`${serverUrl}api/v1/messages/${chatId}`, {
-                params: { limit, offset, sort },
+            const response = await axios.get(`/messages/${chatId}`, {
+                params: {
+                    limit,
+                    offset,
+                    sort,
+                },
             });
 
             setMessages(response?.data?.messages || []);
@@ -67,14 +75,19 @@ export const ChatContextProvider = ({ children }) => {
         }
     };
 
-    const getAllMessages = async (chatId, limit = 15, offset = 0, sort = "asc") => {
+    const getAllMessages = async (
+        chatId,
+        limit = 15,
+        offset = 0,
+        sort = "asc"
+    ) => {
         try {
             if (!chatId) {
                 console.error("Chat ID is required to fetch all messages.");
                 return [];
             }
 
-            const response = await axios.get(`${serverUrl}api/v1/messages/${chatId}`, {
+            const response = await axios.get(`/messages/${chatId}`, {
                 params: { limit, offset, sort },
             });
 
@@ -119,10 +132,13 @@ export const ChatContextProvider = ({ children }) => {
 
     const sendMessage = async (data) => {
         try {
-            const response = await axios.post(`${serverUrl}api/v1/messages`, data);
+            const response = await axios.post(`/messages`, data);
 
             // Update the messages state with the new message
-            setMessages((prevMessages) => [...prevMessages, response?.data?.message]);
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                response?.data?.message,
+            ]);
 
             // update the chats state
             setChats((prevChats) => {
@@ -150,25 +166,23 @@ export const ChatContextProvider = ({ children }) => {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (userId) {
             getUserChats(userId);
         }
     }, [userId]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (chats && user) {
             getAllChatsData();
         }
     }, [chats, user]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedChat) {
             getChatMessages(selectedChat._id);
         }
     }, [selectedChat]);
-
-    console.log("ChatContextProvider rendered with chats:", chats);
 
     return (
         <ChatContext.Provider
@@ -193,5 +207,5 @@ export const ChatContextProvider = ({ children }) => {
 };
 
 export const useChatContext = () => {
-    return React.useContext(ChatContext);
+    return useContext(ChatContext);
 };

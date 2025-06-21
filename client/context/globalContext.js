@@ -1,11 +1,11 @@
-import React from "react";
+import { createContext, useState, useContext } from "react";
 
-const GlobalContext = React.createContext();
+const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
-    const [currentView, setCurrentView] = React.useState("all-chats");
-    const [showFriendProfile, setShowFriendProfile] = React.useState(false);
-    const [showProfile, setShowProfile] = React.useState(false);
+    const [currentView, setCurrentView] = useState("all-chats");
+    const [showFriendProfile, setShowFriendProfile] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
 
     const handleProfileToggle = (show) => {
         setShowProfile(show);
@@ -22,12 +22,12 @@ export const GlobalContextProvider = ({ children }) => {
     return (
         <GlobalContext.Provider
             value={{
+                showProfile,
                 currentView,
                 showFriendProfile,
-                showProfile,
-                handleProfileToggle,
                 handleViewChange,
                 handleFriendProfile,
+                handleProfileToggle,
             }}
         >
             {children}
@@ -36,5 +36,5 @@ export const GlobalContextProvider = ({ children }) => {
 };
 
 export const useGlobalContext = () => {
-    return React.useContext(GlobalContext);
+    return useContext(GlobalContext);
 };

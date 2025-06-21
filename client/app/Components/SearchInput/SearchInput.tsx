@@ -1,14 +1,41 @@
 "use client";
 
+import React, { useState, useEffect, useCallback, use } from "react";
+import lodash from "lodash";
+
 import { searchIcon } from "@/utils/icons";
-import React from "react";
+import { useUserContext } from "@/context/userContext";
 
 function SearchInput() {
-    const [search, setSearch] = React.useState("");
+    const { searchUsers, setSearchResults, searchResults } = useUserContext();
+
+    const [search, setSearch] = useState("");
+
+    const debouncedSearchUsers = useCallback(
+        lodash.debounce((value: string) => {
+            searchUsers(value);
+        }, 500),
+        []
+    );
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value);
+        const searchValue = e.target.value.trimStart();
+        setSearch(searchValue);
+
+        if (searchValue.length > 0) {
+            debouncedSearchUsers(searchValue);
+        } else {
+            debouncedSearchUsers.cancel(); // Cancel any pending debounced calls
+            setSearchResults([]); // Clear search results if input is empty
+        }
     };
+
+    useEffect(() => {
+        // Cleanup function to cancel the debounced function on unmount
+        return () => {
+            debouncedSearchUsers.cancel();
+        };
+    }, [debouncedSearchUsers]);
 
     return (
         <form className="rounded-xl">

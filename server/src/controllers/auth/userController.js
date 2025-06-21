@@ -21,7 +21,9 @@ const registerUser = expressAsyncHandler(async (req, res) => {
 
     // check password length
     if (password.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        return res
+            .status(400)
+            .json({ message: "Password must be at least 6 characters long" });
     }
 
     // Check if user already exists
@@ -175,7 +177,10 @@ const updateUser = expressAsyncHandler(async (req, res) => {
     user.friends = req.body.friends || user.friends;
     user.friendRequests = req.body.friendRequests || user.friendRequests;
     user.lastSeen = req.body.lastSeen || user.lastSeen;
-    user.isVerified = req.body.isVerified !== undefined ? req.body.isVerified : user.isVerified;
+    user.isVerified =
+        req.body.isVerified !== undefined
+            ? req.body.isVerified
+            : user.isVerified;
 
     const updatedUser = await user.save();
 
@@ -268,11 +273,23 @@ const verifyEmail = expressAsyncHandler(async (req, res) => {
     const link = verificationLink;
 
     try {
-        await sendEmail(subject, send_to, sent_from, reply_to, template, name, link);
-        return res.status(200).json({ message: "Verification email sent successfully" });
+        await sendEmail(
+            subject,
+            send_to,
+            sent_from,
+            reply_to,
+            template,
+            name,
+            link
+        );
+        return res
+            .status(200)
+            .json({ message: "Verification email sent successfully" });
     } catch (error) {
         console.error("Error sending verification email:", error);
-        return res.status(500).json({ message: "Failed to send verification email" });
+        return res
+            .status(500)
+            .json({ message: "Failed to send verification email" });
     }
 });
 
@@ -285,7 +302,9 @@ const verifyUser = expressAsyncHandler(async (req, res) => {
     const { verificationToken } = req.params;
 
     if (!verificationToken) {
-        return res.status(400).json({ message: "Invalid verification request" });
+        return res
+            .status(400)
+            .json({ message: "Invalid verification request" });
     }
 
     // Verify the token
@@ -296,7 +315,9 @@ const verifyUser = expressAsyncHandler(async (req, res) => {
     });
 
     if (!token) {
-        return res.status(400).json({ message: "Invalid or expired verification token" });
+        return res
+            .status(400)
+            .json({ message: "Invalid or expired verification token" });
     }
 
     // Find the user associated with the token
@@ -331,7 +352,9 @@ const forgotPassword = expressAsyncHandler(async (req, res) => {
 
     // Validate input
     if (!email) {
-        return res.status(400).json({ message: "Please provide an email address" });
+        return res
+            .status(400)
+            .json({ message: "Please provide an email address" });
     }
 
     // Check if user exists
@@ -372,11 +395,23 @@ const forgotPassword = expressAsyncHandler(async (req, res) => {
     const link = resetLink;
 
     try {
-        await sendEmail(subject, send_to, sent_from, reply_to, template, name, link);
-        return res.status(200).json({ message: "Password reset email sent successfully" });
+        await sendEmail(
+            subject,
+            send_to,
+            sent_from,
+            reply_to,
+            template,
+            name,
+            link
+        );
+        return res
+            .status(200)
+            .json({ message: "Password reset email sent successfully" });
     } catch (error) {
         console.error("Error sending password reset email:", error);
-        return res.status(500).json({ message: "Failed to send password reset email" });
+        return res
+            .status(500)
+            .json({ message: "Failed to send password reset email" });
     }
 });
 
@@ -403,7 +438,9 @@ const resetPassword = expressAsyncHandler(async (req, res) => {
     });
 
     if (!tokenUser) {
-        return res.status(400).json({ message: "Invalid or expired password reset token" });
+        return res
+            .status(400)
+            .json({ message: "Invalid or expired password reset token" });
     }
 
     // Find the user associated with the token
@@ -415,7 +452,9 @@ const resetPassword = expressAsyncHandler(async (req, res) => {
 
     // Check if password is valid
     if (password.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        return res
+            .status(400)
+            .json({ message: "Password must be at least 6 characters long" });
     }
 
     // Update user password
@@ -432,17 +471,26 @@ const resetPassword = expressAsyncHandler(async (req, res) => {
     res.status(200).json({ message: "Password reset successfully" });
 });
 
+/**
+ *  @desc   Change user password
+ *  @route  PATCH /api/v1/change-password
+ *   @access Private
+ */
 const changePassword = expressAsyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     // Validate input
     if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Please provide current and new passwords" });
+        return res
+            .status(400)
+            .json({ message: "Please provide current and new passwords" });
     }
 
     // Check if new password is valid
     if (newPassword.length < 6) {
-        return res.status(400).json({ message: "New password must be at least 6 characters long" });
+        return res.status(400).json({
+            message: "New password must be at least 6 characters long",
+        });
     }
 
     // Find the user
@@ -454,7 +502,9 @@ const changePassword = expressAsyncHandler(async (req, res) => {
     // Compare current password
     const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
-        return res.status(400).json({ message: "Current password is incorrect" });
+        return res
+            .status(400)
+            .json({ message: "Current password is incorrect" });
     }
 
     // Update password
@@ -466,6 +516,129 @@ const changePassword = expressAsyncHandler(async (req, res) => {
     }
 
     res.status(200).json({ message: "Password changed successfully" });
+});
+
+/**
+ *  @desc   Search users by username or email
+ *  @route  GET /api/v1/search-users
+ *   @access Private
+ */
+const searchUsers = expressAsyncHandler(async (req, res) => {
+    const query = req.query.q;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Calculate skip value for pagination
+    const skip = (page - 1) * limit;
+
+    try {
+        if (!query) {
+            return res
+                .status(400)
+                .json({ message: "Search query is required" });
+        }
+
+        // Use regex for case-insensitive search
+        const regex = new RegExp(query, "i");
+
+        // Search users by username or email
+        const users = await UserModel.find({
+            $or: [{ username: regex }, { email: regex }],
+            _id: { $ne: req.user._id }, // Exclude current user
+        })
+            .select("-password") // Exclude password from results
+            .skip(skip)
+            .limit(limit);
+
+        // Get total count of matching users
+        const totalCount = await UserModel.countDocuments({
+            $or: [{ username: regex }, { email: regex }],
+            _id: { $ne: req.user._id }, // Exclude current user
+        });
+
+        res.status(200).json({
+            data: users,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalResults: totalCount,
+        });
+    } catch (error) {
+        console.error("Error searching users:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+/**
+ *  @desc   Send a friend request
+ *  @route  POST /api/v1/friend-request
+ *    @access Private
+ */
+const friendRequest = expressAsyncHandler(async (req, res) => {
+    const { friendId } = req.body;
+
+    // Validate input
+    if (!friendId) {
+        return res.status(400).json({ message: "Friend ID is required" });
+    }
+
+    // Find the user and the friend
+    const user = await UserModel.findById(req.user._id);
+    const friend = await UserModel.findById(friendId);
+
+    if (!user || !friend) {
+        return res.status(404).json({ message: "User or friend not found" });
+    }
+
+    // Check if already friends or friend request exists
+    if (user.friends.includes(friendId)) {
+        return res.status(400).json({ message: "You are already friends" });
+    }
+    if (user.friendRequests.includes(friendId)) {
+        return res.status(400).json({ message: "Friend request already sent" });
+    }
+
+    // Add friend request to user's friend requests
+    user.friendRequests.push(friendId);
+    await user.save();
+
+    // Add user to friend's friend requests
+    friend.friendRequests.push(user._id);
+    await friend.save();
+
+    res.status(200).json({ message: "Friend request sent successfully" });
+});
+
+const acceptFriendRequest = expressAsyncHandler(async (req, res) => {
+    const { friendId } = req.body;
+
+    // Validate input
+    if (!friendId) {
+        return res.status(400).json({ message: "Friend ID is required" });
+    }
+
+    // Find the user and the friend
+    const user = await UserModel.findById(req.user._id);
+    const friend = await UserModel.findById(friendId);
+
+    if (!user || !friend) {
+        return res.status(404).json({ message: "User or friend not found" });
+    }
+
+    // Check if friend request exists
+    if (!user.friendRequests.includes(friend._id)) {
+        return res.status(400).json({ message: "No friend request found" });
+    }
+
+    // Accept friend request
+    user.friends.push(friend._id);
+    friend.friends.push(user._id);
+
+    // Remove friend request
+    user.friendRequests.pull(friend._id);
+    await user.save();
+    await friend.save();
+
+    res.status(200).json({ message: "Friend request accepted successfully" });
 });
 
 export {
@@ -480,4 +653,7 @@ export {
     forgotPassword,
     resetPassword,
     changePassword,
+    searchUsers,
+    friendRequest,
+    acceptFriendRequest,
 };

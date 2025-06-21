@@ -11,10 +11,17 @@ import {
     forgotPassword,
     resetPassword,
     changePassword,
+    searchUsers,
+    friendRequest,
+    acceptFriendRequest,
 } from "../controllers/auth/userController.js";
 import { deleteUser } from "../controllers/auth/adminController.js";
 import { getAllUsers } from "../controllers/auth/creatorMiddleware.js";
-import { adminMiddleware, creatorMiddleware, protect } from "../middlewares/authMiddleware.js";
+import {
+    adminMiddleware,
+    creatorMiddleware,
+    protect,
+} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -47,5 +54,14 @@ router.post("/reset-password/:resetPasswordToken", resetPassword);
 
 // change password (user must be logged in)
 router.patch("/change-password", protect, changePassword);
+
+// search users
+router.get("/search-users", protect, searchUsers);
+
+// friend request
+router.post("/friend-request", protect, friendRequest);
+
+// accepted friend request
+router.patch("/friend/accept", protect, acceptFriendRequest);
 
 export default router;
