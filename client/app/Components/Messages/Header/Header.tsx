@@ -2,18 +2,21 @@
 
 import { useChatContext } from "@/context/chatContext";
 import { useGlobalContext } from "@/context/globalContext";
+import { IUser } from "@/types/type";
 import { formatDateLastSeen } from "@/utils/date";
 import { dots, searchIcon } from "@/utils/icons";
 import Image from "next/image";
 import React from "react";
 
 function Header() {
-    const { activeChatData } = useChatContext();
+    const { activeChatData, onlineUsers } = useChatContext();
     const { handleFriendProfile, showFriendProfile } = useGlobalContext();
 
     const { photo, lastSeen } = activeChatData || {};
 
-    const isOnline = false;
+    const isOnline = onlineUsers.find(
+        (user: IUser) => user._id === activeChatData?._id
+    );
 
     return (
         <div className="px-4 py-2 flex justify-between border-b-2 border-white dark:border-[#3C3C3C]/60">
@@ -27,7 +30,7 @@ function Header() {
                     width={42}
                     height={42}
                     className="rounded-full aspect-square object-cover border-2 border-[white] dark:border-[#3C3C3C]/65 cursor-pointer
-          hover:scale-105 transition-transform duration-300 ease-in-out"
+                    hover:scale-105 transition-transform duration-300 ease-in-out"
                 />
 
                 <div className="flex flex-col">

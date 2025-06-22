@@ -4,13 +4,13 @@ import { formatDateBasedOnTime } from "@/utils/date";
 import Image from "next/image";
 import React from "react";
 
-interface IRecever {
+interface IReceiver {
     messageId: string;
     content: string;
     createdAt: string;
 }
 
-function Recever({ messageId, content, createdAt }: IRecever) {
+function Receiver({ messageId, content, createdAt }: IReceiver) {
     const { activeChatData } = useChatContext();
     const { photo, username } = activeChatData || {};
     return (
@@ -27,7 +27,9 @@ function Recever({ messageId, content, createdAt }: IRecever) {
 
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-6">
-                        <h4 className="font-bold text-[#454e56] dark:text-gray-200">{username}</h4>
+                        <h4 className="font-bold text-[#454e56] dark:text-gray-200">
+                            {username}
+                        </h4>
                         <p className="pt-[2px] text-[#aaa] text-xs">
                             {formatDateBasedOnTime(createdAt)}
                         </p>
@@ -45,4 +47,4 @@ function Recever({ messageId, content, createdAt }: IRecever) {
     );
 }
 
-export default Recever;
+export default Receiver;

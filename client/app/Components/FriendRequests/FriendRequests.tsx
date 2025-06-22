@@ -1,4 +1,4 @@
-"use cleint";
+"use client";
 import { useChatContext } from "@/context/chatContext";
 import { useUserContext } from "@/context/userContext";
 import { IUser } from "@/types/type";
@@ -13,11 +13,6 @@ function FriendRequests() {
     const { friendRequests } = user;
 
     const [requests, setRequests] = useState<IUser[]>([]);
-
-    console.log(
-        "🚀 -> FriendRequests.tsx:17 -> FriendRequests -> requests:",
-        requests
-    );
 
     useEffect(() => {
         // fetch friend requests data

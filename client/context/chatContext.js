@@ -1,7 +1,8 @@
 import axios from "../axios/config";
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, createContext, useContext, use } from "react";
 
 import { useUserContext } from "./userContext";
+import io from "socket.io-client";
 
 const ChatContext = createContext();
 
@@ -12,6 +13,9 @@ export const ChatContextProvider = ({ children }) => {
     const [allChatsData, setAllChatsData] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [activeChatData, setActiveChatData] = useState({});
+    const [socket, setSocket] = useState(null);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [arrivedMessage, setArrivedMessage] = useState(null);
 
     const { user } = useUserContext();
 
@@ -124,6 +128,23 @@ export const ChatContextProvider = ({ children }) => {
         }
     };
 
+    // create a new chat
+    const createChat = async (senderId, receiverId) => {
+        try {
+            const res = await axios.post("/chats", {
+                senderId,
+                receiverId,
+            });
+
+            // update the chats state
+            setChats((prev) => [...prev, res.data.chat]);
+
+            return res.data;
+        } catch (error) {
+            console.log("Error in createChat", error.message);
+        }
+    };
+
     const handleSelectedChat = async (chat) => {
         setSelectedChat(chat);
 
@@ -161,10 +182,122 @@ export const ChatContextProvider = ({ children }) => {
 
                 return updatedChats;
             });
+
+            // Emit the message to the socket server
+            if (socket) {
+                socket.emit("send message", {
+                    senderId: data.senderId,
+                    receiverId: activeChatData._id,
+                    content: data.content,
+                    chatId: data.chatId,
+                });
+            }
         } catch (error) {
             console.error("Error sending message:", error);
         }
     };
+
+    // useEffect
+    useEffect(() => {
+        // prevent emitting the socket connection if user is not logged in
+        if (!user || !user._id || Object.keys(user).length === 0) {
+            // If user is not logged in, disconnect any existing socket
+            if (socket) {
+                console.log("User logged out or invalid, disconnecting socket");
+                socket.disconnect();
+                setSocket(null);
+                setOnlineUsers([]);
+            }
+            return;
+        }
+
+        console.log("Creating socket connection for user:", user._id);
+        const newSocket = io(process.env.NEXT_PUBLIC_API_URL, {
+            transports: ["websocket"],
+            withCredentials: true,
+        });
+
+        newSocket.on("connection", () => {
+            console.log("Socket connected:", newSocket.id);
+        });
+
+        newSocket.on("disconnect", () => {
+            console.log("Socket disconnected:", newSocket.id);
+        });
+
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [user]);
+
+    useEffect(() => {
+        // prevent emitting the socket connection if user is not logged in or socket is null
+        if (!user || !socket || !user._id) return;
+
+        console.log("Emitting add user with userId:", user._id);
+        socket.emit("add user", user._id);
+
+        // Listen for changes in connected users
+        socket.on("get users", (connectedUsers) => {
+            // fetch all online users
+            const getOnlineUsers = async () => {
+                try {
+                    const usersOnline = await Promise.all(
+                        connectedUsers.map(async (user) => {
+                            const userData = await getUserById(user.userId);
+                            return userData.user;
+                        })
+                    );
+
+                    const filteredUsersOnline = usersOnline.filter(
+                        (friend) =>
+                            friend?._id !== userId &&
+                            user?.friends?.includes(friend?._id)
+                    );
+
+                    setOnlineUsers(filteredUsersOnline);
+                } catch (error) {
+                    console.error("Error fetching online users:", error);
+                }
+            };
+
+            getOnlineUsers();
+        });
+
+        // Listen for new messages
+        socket.on("get message", (message) => {
+            setArrivedMessage({
+                senderId: message.senderId,
+                content: message.content,
+                createdAt: Date.now(),
+            });
+        });
+
+        // Cleanup function to remove event listeners
+        return () => {
+            if (socket) {
+                socket.off("get users");
+                socket.off("get message");
+            }
+        };
+    }, [user, socket]);
+
+    useEffect(() => {
+        if (arrivedMessage && selectedChat) {
+            // Check if the arrived message is from the current chat
+            if (
+                selectedChat.participants.includes(arrivedMessage.senderId) &&
+                arrivedMessage.senderId !== userId
+            ) {
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    arrivedMessage,
+                ]);
+            }
+        }
+    }, [arrivedMessage, selectedChat, userId]);
 
     useEffect(() => {
         if (userId) {
@@ -189,9 +322,13 @@ export const ChatContextProvider = ({ children }) => {
             value={{
                 chats,
                 messages,
+                socket,
+                onlineUsers,
                 selectedChat,
                 allChatsData,
                 activeChatData,
+                arrivedMessage,
+                createChat,
                 sendMessage,
                 setMessages,
                 getUserById,
@@ -199,6 +336,7 @@ export const ChatContextProvider = ({ children }) => {
                 getAllMessages,
                 getChatMessages,
                 handleSelectedChat,
+                setOnlineUsers,
             }}
         >
             {children}

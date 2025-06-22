@@ -5,10 +5,12 @@ import { Toaster } from "react-hot-toast";
 
 import UserProvider from "@/providers/UserProvider";
 import "./globals.css";
+import { EdgeStoreProvider } from "@/lib/edgestore";
 
 export const metadata: Metadata = {
     title: "Messages App",
-    description: "A simple chat application built with Next.js, React, and TypeScript",
+    description:
+        "A simple chat application built with Next.js, React, and TypeScript",
 };
 
 export default function RootLayout({
@@ -29,7 +31,9 @@ export default function RootLayout({
             </head>
             <body className={inter.className}>
                 <Toaster position="top-center" />
-                <UserProvider>{children}</UserProvider>
+                <UserProvider>
+                    <EdgeStoreProvider>{children}</EdgeStoreProvider>
+                </UserProvider>
             </body>
         </html>
     );

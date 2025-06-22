@@ -3,7 +3,7 @@ import { useUserContext } from "@/context/userContext";
 import { IMessage } from "@/types/type";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import Sender from "../Sender/Sender";
-import Recever from "../Reciever/Receiver";
+import Receiver from "../Reciever/Receiver";
 
 function Body() {
     const messageBodyRef = useRef(null) as any;
@@ -37,7 +37,10 @@ function Body() {
     }, [messages]);
 
     return (
-        <div ref={messageBodyRef} className="message-body relative flex-1 p-4 overflow-y-auto">
+        <div
+            ref={messageBodyRef}
+            className="message-body relative flex-1 p-4 overflow-y-auto"
+        >
             <div className="relative flex flex-col">
                 {messages.map((message: IMessage) =>
                     message.senderId === userId ? (
@@ -50,7 +53,7 @@ function Body() {
                         </div>
                     ) : (
                         <div key={message?._id}>
-                            <Recever
+                            <Receiver
                                 messageId={message?._id}
                                 content={message.content}
                                 createdAt={message.createdAt}

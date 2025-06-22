@@ -28,8 +28,8 @@ function FriendProfile() {
                     <Image
                         src={photo}
                         alt="Profile Picture"
-                        width={120}
-                        height={120}
+                        width={160}
+                        height={160}
                         className="rounded-full aspect-square object-cover border-4 border-white dark:border-gray-700 cursor-pointer
                 hover:scale-105 transition-all duration-300 ease-out shadow-md hover:shadow-xl"
                     />

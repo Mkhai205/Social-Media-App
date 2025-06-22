@@ -1,17 +1,17 @@
 import { useUserContext } from "@/context/userContext";
-// import { useEdgeStore } from "@/lib/edgestore";
-import { logout } from "@/utils/icons";
+import { useEdgeStore } from "@/lib/edgestore";
+import { logout, upload } from "@/utils/icons";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 function Profile() {
-    // const { edgestore } = useEdgeStore();
+    const { edgestore } = useEdgeStore();
 
     const { updateUser, changePassword, logoutUser } = useUserContext();
 
     const photo = useUserContext().user?.photo;
     const bio = useUserContext().user?.bio;
-    const name = useUserContext().user?.name;
+    const name = useUserContext().user?.username;
 
     const [localBio, setLocalBio] = useState(bio);
     const [localName, setLocalName] = useState(name);
@@ -40,14 +40,14 @@ function Profile() {
 
     const handleUploadImage = async () => {
         if (file) {
-            // const res = await edgestore.publicFiles.upload({
-            //     file,
-            //     options: {
-            //         temporary: false, // delete the file after 24 hours
-            //     },
-            // });
-            // const { url } = res;
-            // updateUser({ photo: url });
+            const res = await edgestore.publicFiles.upload({
+                file,
+                options: {
+                    temporary: false, // delete the file after 24 hours
+                },
+            });
+            const { url } = res;
+            updateUser({ photo: url });
         }
     };
 
@@ -68,8 +68,8 @@ function Profile() {
                     <Image
                         src={photo}
                         alt="profile"
-                        width={120}
-                        height={120}
+                        width={160}
+                        height={160}
                         className="aspect-square rounded-full object-cover border-2 border-[white] cursor-pointer 
                         hover:scale-105 transition-transform duration-300 ease-in-out shadow-sm select-text  
                         dark:border-[#3C3C3C]/65"
@@ -88,10 +88,10 @@ function Profile() {
 
                     <span
                         className="absolute top-0 w-full h-full rounded-full cursor-pointer flex items-center justify-center 
-                        bg-black bg-opacity-50 text-white font-semibold opacity-0 group-hover:opacity-100 
+                        bg-black bg-opacity-50 text-3xl text-slate-200 font-semibold opacity-0 group-hover:opacity-100 
                         transition-opacity duration-300 ease-in-out pointer-events-none"
                     >
-                        Change Image
+                        {upload}
                     </span>
                 </div>
                 <form
@@ -101,48 +101,50 @@ function Profile() {
                         updateUser({ username: localName, bio: localBio });
                     }}
                 >
-                    <div className="mb-2">
-                        <label
-                            htmlFor="name"
-                            className={`text-lg font-semibold gradient-text dark:text-slate-200`}
-                        >
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            id="name"
-                            defaultValue={localName}
-                            onChange={handleInput("name")}
-                            className="w-full pl-4 p-2 rounded-md bg-transparent shadow-sm border-2 border-[white] 
-                            focus:outline-none focus:ring-2 focus:ring-[#7263f3] focus:border-transparent
-                            dark:bg-[#3C3C3C]/65 dark:border-[#3C3C3C]/65"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="bio"
-                            className={`text-lg font-semibold gradient-text dark:text-slate-200`}
-                        >
-                            Bio
-                        </label>
-                        <textarea
-                            name="bio"
-                            id="bio"
-                            rows={3}
-                            defaultValue={localBio}
-                            onChange={handleInput("bio")}
-                            className="w-full pl-4 p-2 rounded-md bg-transparent dark:bg-[#3C3C3C]/65 resize-none
-                            dark:border-[#3C3C3C]/65 shadow-sm border-2 border-[white] focus:outline-none focus:ring-2 
-                            focus:ring-[#7263f3] focus:border-transparent"
-                        ></textarea>
+                    <div className="grid grid-cols-6 gap-4 mt-4">
+                        <div className="col-span-2">
+                            <label
+                                htmlFor="name"
+                                className={`text-lg font-semibold gradient-text dark:text-slate-200`}
+                            >
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                id="name"
+                                defaultValue={localName}
+                                onChange={handleInput("name")}
+                                className="w-full pl-4 p-2 rounded-md bg-transparent shadow-sm border-2 border-[white] 
+                                focus:outline-none focus:ring-2 focus:ring-[#7263f3] focus:border-transparent
+                                dark:bg-[#3C3C3C]/65 dark:border-[#3C3C3C]/65"
+                            />
+                        </div>
+                        <div className="col-span-4">
+                            <label
+                                htmlFor="bio"
+                                className={`text-lg font-semibold gradient-text dark:text-slate-200`}
+                            >
+                                Bio
+                            </label>
+                            <textarea
+                                name="bio"
+                                id="bio"
+                                rows={3}
+                                defaultValue={localBio}
+                                onChange={handleInput("bio")}
+                                className="w-full pl-4 p-2 rounded-md bg-transparent dark:bg-[#3C3C3C]/65 resize-none
+                                dark:border-[#3C3C3C]/65 shadow-sm border-2 border-[white] focus:outline-none focus:ring-2 
+                                focus:ring-[#7263f3] focus:border-transparent"
+                            ></textarea>
+                        </div>
                     </div>
 
                     <div className="py-4 flex justify-end">
                         <button
                             type="submit"
                             className="bg-[#7263f3] text-white p-2 rounded-md hover:bg-[#f56693] transition-colors 
-                            duration-300 ease-in-out"
+                                duration-300 ease-in-out"
                         >
                             Update Profile
                         </button>

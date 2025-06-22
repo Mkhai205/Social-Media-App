@@ -36,17 +36,27 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             // Only redirect to login if not already on an auth-related page
-            const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
-            const authPaths = ["/login", "/register", "/forgot-password", "/reset-password"];
+            const currentPath =
+                typeof window !== "undefined" ? window.location.pathname : "";
+            const authPaths = [
+                "/login",
+                "/register",
+                "/forgot-password",
+                "/reset-password",
+            ];
 
             // Check if current path is already an auth-related path
-            const isAuthPath = authPaths.some((path) => currentPath.startsWith(path));
+            const isAuthPath = authPaths.some((path) =>
+                currentPath.startsWith(path)
+            );
 
             if (!isAuthPath) {
                 console.error("Unauthorized access - redirecting to login");
                 window.location.href = "/login";
             } else {
-                console.log("Unauthorized but already on auth page, not redirecting");
+                console.log(
+                    "Unauthorized but already on auth page, not redirecting"
+                );
             }
         } else if (error.response && error.response.status === 403) {
             // Handle forbidden access

@@ -597,10 +597,6 @@ const friendRequest = expressAsyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Friend request already sent" });
     }
 
-    // Add friend request to user's friend requests
-    user.friendRequests.push(friendId);
-    await user.save();
-
     // Add user to friend's friend requests
     friend.friendRequests.push(user._id);
     await friend.save();

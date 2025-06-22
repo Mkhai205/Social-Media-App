@@ -135,6 +135,7 @@ function Sidebar() {
                     </button>
                 </div>
             </div>
+
             <div className="py-4 flex-1">
                 <h2
                     className={`px-4 font-bold text-2xl text-center ${

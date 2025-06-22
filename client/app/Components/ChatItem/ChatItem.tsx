@@ -16,7 +16,7 @@ interface ChatItemProps {
 }
 
 function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
-    const { getAllMessages } = useChatContext();
+    const { getAllMessages, onlineUsers } = useChatContext();
     const { photo } = user;
     const userId = useUserContext().user?._id;
 
@@ -34,7 +34,11 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
         allMessages();
     }, [allMessages, chatId]);
 
-    const isUserOnline = true;
+    const isUserOnline = React.useMemo(() => {
+        return onlineUsers.some(
+            (onlineUser: IUser) => onlineUser._id === user._id
+        );
+    }, [onlineUsers, user._id]);
 
     return (
         <div
@@ -65,7 +69,9 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
                 <div className="flex justify-between items-center">
                     <h4 className="font-medium">{user.username}</h4>
                     <p className="text-[#aaa] text-sm">
-                        {lastMessage?.createdAt ? formatDateBasedOnTime(lastMessage.createdAt) : ""}
+                        {lastMessage?.createdAt
+                            ? formatDateBasedOnTime(lastMessage.createdAt)
+                            : ""}
                     </p>
                 </div>
                 <div className="flex justify-between items-center">
@@ -73,7 +79,8 @@ function ChatItem({ user, active, onClick, chatId }: ChatItemProps) {
                         {lastMessage?.senderId === userId
                             ? "You: " +
                               (lastMessage && lastMessage?.content?.length > 20
-                                  ? lastMessage?.content.substring(0, 20) + "..."
+                                  ? lastMessage?.content.substring(0, 20) +
+                                    "..."
                                   : lastMessage?.content)
                             : lastMessage && lastMessage?.content?.length > 25
                             ? lastMessage?.content.substring(0, 25) + "..."
